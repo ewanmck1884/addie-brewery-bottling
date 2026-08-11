@@ -287,10 +287,10 @@
       <div class="field">
         <label>Sugar type</label>
         <select id="sugarType">
-          <option value="1.0">Dextrose (corn sugar)</option>
-          <option value="0.9">Table sugar (sucrose)</option>
-          <option value="1.31">Dried malt extract</option>
-          <option value="1.05">Honey</option>
+          <option value="4.0">Dextrose (corn sugar)</option>
+          <option value="3.83">Table sugar (sucrose)</option>
+          <option value="4.6">Dried malt extract</option>
+          <option value="5.0">Honey</option>
         </select>
       </div>
     </div>
@@ -394,7 +394,7 @@ function update(){
 
   const residual = residualCO2(tempC);
   const diff = Math.max(0, target - residual);
-  const grams = 15.195 * L * diff * sugarFactor;
+  const grams = L * diff * sugarFactor;
   const oz = grams / 28.3495;
 
   document.getElementById('grams').textContent = grams.toFixed(0);
