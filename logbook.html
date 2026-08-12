@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Addie Brewery Batch Logbook</title>
+<link rel="icon" href="favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="logbook-manifest.json">
+<meta name="theme-color" content="#14100c">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #14100c;
+    --panel: #1d1610;
+    --panel-2: #241b13;
+    --line: #372a1c;
+    --copper: #c9752b;
+    --copper-bright: #e08f3f;
+    --brass: #b08d57;
+    --foam: #f3e9d2;
+    --text: #ece1cc;
+    --text-dim: #a1907a;
+    --good: #7a9b5c;
+    --warn: #c9752b;
+    --danger: #b64b3a;
+    --radius: 4px;
+  }
+  *{ box-sizing: border-box; }
+  html,body{
+    margin:0; padding:0;
+    background: radial-gradient(120% 140% at 15% -10%, #241a10 0%, var(--bg) 55%);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    min-height: 100vh;
+  }
+  .wrap{
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 32px 24px 72px;
+  }
+  nav{
+    display: flex;
+    gap: 18px;
+    margin-bottom: 28px;
+    font-size: 13px;
+  }
+  nav a{
+    color: var(--text-dim);
+    text-decoration: none;
+    padding-bottom: 4px;
+    border-bottom: 2px solid transparent;
+    letter-spacing: 0.02em;
+  }
+  nav a.active{
+    color: var(--copper-bright);
+    border-bottom-color: var(--copper);
+  }
+  nav a:hover{ color: var(--foam); }
+  header{
+    margin-bottom: 32px;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .eyebrow{
+    font-size: 12px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--copper-bright);
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  h1{
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: clamp(28px, 4.5vw, 42px);
+    line-height: 1.05;
+    margin: 0 0 8px;
+    color: var(--foam);
+    letter-spacing: -0.01em;
+  }
+  header p{
+    color: var(--text-dim);
+    font-size: 14px;
+    max-width: 46ch;
+    line-height: 1.5;
+    margin: 0;
+  }
+  .header-actions{
+    display: flex;
+    gap: 10px;
+  }
+  button, .btn{
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    border-radius: var(--radius);
+    padding: 10px 16px;
+    cursor: pointer;
+    border: 1px solid var(--line);
+    background: var(--panel-2);
+    color: var(--text);
+    transition: border-color .15s ease, color .15s ease;
+  }
+  button:hover, .btn:hover{ border-color: var(--brass); color: var(--foam); }
+  button.primary{
+    background: var(--copper);
+    border-color: var(--copper);
+    color: #1a1208;
+  }
+  button.primary:hover{ background: var(--copper-bright); border-color: var(--copper-bright); color: #1a1208; }
+  button.ghost{ background: transparent; }
+  button.small{ padding: 6px 10px; font-size: 12px; }
+  button.danger-ghost{ color: #d97f6c; border-color: rgba(182,75,58,0.4); }
+  button.danger-ghost:hover{ border-color: var(--danger); color: #f0a893; }
+
+  .card{
+    background: linear-gradient(180deg, var(--panel-2), var(--panel));
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 24px;
+  }
+
+  /* Form */
+  #formCard{ margin-bottom: 32px; display: none; }
+  #formCard.open{ display: block; }
+  .form-grid{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+  .form-grid .full{ grid-column: 1 / -1; }
+  @media (max-width: 640px){
+    .form-grid{ grid-template-columns: 1fr; }
+  }
+  .field label{
+    display: block;
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 7px;
+    letter-spacing: 0.01em;
+  }
+  input[type="text"], input[type="date"], input[type="number"], textarea{
+    width: 100%;
+    background: #120d08;
+    border: 1px solid var(--line);
+    color: var(--foam);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 15px;
+    padding: 10px 12px;
+    border-radius: var(--radius);
+    outline: none;
+  }
+  input:focus, textarea:focus{ border-color: var(--copper); }
+  textarea{ resize: vertical; min-height: 70px; }
+  .abv-hint{
+    font-size: 12px;
+    color: var(--copper-bright);
+    margin-top: 6px;
+  }
+  .star-input{
+    display: flex;
+    gap: 4px;
+    font-size: 22px;
+  }
+  .star-input span{
+    cursor: pointer;
+    color: var(--line);
+    transition: color .1s ease;
+  }
+  .star-input span.filled{ color: var(--copper-bright); }
+  .form-actions{
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+  }
+
+  /* List */
+  .empty-state{
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-dim);
+  }
+  .empty-state .glass{ width: 64px; margin: 0 auto 16px; opacity: 0.5; }
+  .empty-state h3{
+    font-family: 'Fraunces', serif;
+    color: var(--foam);
+    font-weight: 600;
+    margin: 0 0 8px;
+  }
+  .batch-list{ display: flex; flex-direction: column; gap: 14px; }
+  .batch{
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 14px;
+    align-items: start;
+  }
+  .batch-main h3{
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 19px;
+    color: var(--foam);
+    margin: 0 0 6px;
+  }
+  .batch-dates{
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+  }
+  .batch-stats{
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
+  .stat{
+    font-size: 13px;
+  }
+  .stat .stat-label{
+    color: var(--text-dim);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: block;
+    margin-bottom: 2px;
+  }
+  .stat .stat-val{
+    font-family: 'Fraunces', serif;
+    color: var(--copper-bright);
+    font-weight: 600;
+    font-size: 15px;
+  }
+  .batch-notes{
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.5;
+    opacity: 0.9;
+  }
+  .batch-stars{
+    color: var(--copper-bright);
+    font-size: 14px;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+  }
+  .batch-actions{
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .import-input{ display: none; }
+  .toast{
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--panel-2);
+    border: 1px solid var(--copper);
+    color: var(--foam);
+    padding: 12px 20px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .25s ease;
+  }
+  .toast.show{ opacity: 1; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="logbook.html" class="active">Batch Logbook</a>
+    <a href="calculator.html">Priming Calculator</a>
+  </nav>
+
+  <header>
+    <div>
+      <div class="eyebrow">Addie Brewery</div>
+      <h1>Batch Logbook</h1>
+      <p>Keep a record of every kit, its readings, and how it turned out — so next time you're not starting from scratch.</p>
+    </div>
+    <div class="header-actions">
+      <button class="ghost small" id="exportBtn">Export</button>
+      <button class="ghost small" id="importBtn">Import</button>
+      <input type="file" id="importInput" class="import-input" accept="application/json">
+      <button class="primary" id="newBatchBtn">+ New batch</button>
+    </div>
+  </header>
+
+  <div class="card" id="formCard">
+    <div class="form-grid">
+      <div class="field full">
+        <label>Kit / recipe name</label>
+        <input type="text" id="fName" placeholder="e.g. Muntons American IPA">
+      </div>
+      <div class="field">
+        <label>Brew day</label>
+        <input type="date" id="fBrewDate">
+      </div>
+      <div class="field">
+        <label>Bottling day</label>
+        <input type="date" id="fBottleDate">
+      </div>
+      <div class="field">
+        <label>Original gravity (OG)</label>
+        <input type="number" id="fOG" step="0.001" placeholder="1.040">
+      </div>
+      <div class="field">
+        <label>Final gravity (FG)</label>
+        <input type="number" id="fFG" step="0.001" placeholder="1.010">
+      </div>
+      <div class="field full">
+        <div class="abv-hint" id="abvHint">Enter OG and FG to estimate ABV</div>
+      </div>
+      <div class="field full">
+        <label>Tasting notes</label>
+        <textarea id="fNotes" placeholder="How did it turn out? Clarity, carbonation, flavour, anything you'd change next time..."></textarea>
+      </div>
+      <div class="field full">
+        <label>Rating</label>
+        <div class="star-input" id="starInput">
+          <span data-val="1">★</span><span data-val="2">★</span><span data-val="3">★</span><span data-val="4">★</span><span data-val="5">★</span>
+        </div>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="ghost" id="cancelBtn">Cancel</button>
+      <button class="primary" id="saveBtn">Save batch</button>
+    </div>
+  </div>
+
+  <div id="listArea"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_KEY = 'addie-brewery-logbook';
+let batches = [];
+let editingId = null;
+let currentRating = 0;
+
+function load(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    batches = raw ? JSON.parse(raw) : [];
+  }catch(e){ batches = []; }
+}
+function save(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(batches));
+}
+
+function calcABV(og, fg){
+  if(!og || !fg || isNaN(og) || isNaN(fg)) return null;
+  return (og - fg) * 131.25;
+}
+
+function fmtDate(d){
+  if(!d) return '';
+  const dt = new Date(d + 'T00:00:00');
+  return dt.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+}
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// Form handling
+const formCard = document.getElementById('formCard');
+const fName = document.getElementById('fName');
+const fBrewDate = document.getElementById('fBrewDate');
+const fBottleDate = document.getElementById('fBottleDate');
+const fOG = document.getElementById('fOG');
+const fFG = document.getElementById('fFG');
+const fNotes = document.getElementById('fNotes');
+const abvHint = document.getElementById('abvHint');
+const starInput = document.getElementById('starInput');
+
+function updateAbvHint(){
+  const og = parseFloat(fOG.value);
+  const fg = parseFloat(fFG.value);
+  const abv = calcABV(og, fg);
+  abvHint.textContent = abv !== null ? `Estimated ABV: ${abv.toFixed(2)}%` : 'Enter OG and FG to estimate ABV';
+}
+fOG.addEventListener('input', updateAbvHint);
+fFG.addEventListener('input', updateAbvHint);
+
+starInput.addEventListener('click', (e) => {
+  const span = e.target.closest('span');
+  if(!span) return;
+  currentRating = parseInt(span.dataset.val);
+  renderStars();
+});
+function renderStars(){
+  [...starInput.children].forEach(s => {
+    s.classList.toggle('filled', parseInt(s.dataset.val) <= currentRating);
+  });
+}
+
+function openForm(batch){
+  editingId = batch ? batch.id : null;
+  fName.value = batch ? batch.name : '';
+  fBrewDate.value = batch ? batch.brewDate : '';
+  fBottleDate.value = batch ? batch.bottleDate : '';
+  fOG.value = batch ? batch.og : '';
+  fFG.value = batch ? batch.fg : '';
+  fNotes.value = batch ? batch.notes : '';
+  currentRating = batch ? batch.rating || 0 : 0;
+  renderStars();
+  updateAbvHint();
+  formCard.classList.add('open');
+  formCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+function closeForm(){
+  formCard.classList.remove('open');
+  editingId = null;
+}
+
+document.getElementById('newBatchBtn').addEventListener('click', () => openForm(null));
+document.getElementById('cancelBtn').addEventListener('click', closeForm);
+
+document.getElementById('saveBtn').addEventListener('click', () => {
+  if(!fName.value.trim()){
+    fName.focus();
+    return;
+  }
+  const og = parseFloat(fOG.value) || null;
+  const fg = parseFloat(fFG.value) || null;
+  const data = {
+    id: editingId || (Date.now().toString(36) + Math.random().toString(36).slice(2,7)),
+    name: fName.value.trim(),
+    brewDate: fBrewDate.value,
+    bottleDate: fBottleDate.value,
+    og, fg,
+    abv: calcABV(og, fg),
+    notes: fNotes.value.trim(),
+    rating: currentRating
+  };
+  if(editingId){
+    const idx = batches.findIndex(b => b.id === editingId);
+    if(idx > -1) batches[idx] = data;
+  } else {
+    batches.unshift(data);
+  }
+  save();
+  closeForm();
+  render();
+  showToast(editingId ? 'Batch updated' : 'Batch saved');
+});
+
+function deleteBatch(id){
+  if(!confirm('Delete this batch entry? This can\'t be undone.')) return;
+  batches = batches.filter(b => b.id !== id);
+  save();
+  render();
+  showToast('Batch deleted');
+}
+
+function editBatch(id){
+  const b = batches.find(b => b.id === id);
+  if(b) openForm(b);
+}
+
+function render(){
+  const listArea = document.getElementById('listArea');
+  if(batches.length === 0){
+    listArea.innerHTML = `
+      <div class="card empty-state">
+        <svg class="glass" viewBox="0 0 120 200" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22 18 L98 18 L90 178 Q60 190 30 178 Z" fill="none" stroke="#8a6a44" stroke-width="3"/>
+        </svg>
+        <h3>No batches logged yet</h3>
+        <p>Add your first batch to start building your brewing history.</p>
+      </div>`;
+    return;
+  }
+  listArea.innerHTML = `<div class="batch-list">${batches.map(renderBatch).join('')}</div>`;
+}
+
+function renderBatch(b){
+  const stars = '★★★★★'.slice(0, b.rating || 0) + '☆☆☆☆☆'.slice(0, 5 - (b.rating || 0));
+  const dateRange = [b.brewDate ? `Brewed ${fmtDate(b.brewDate)}` : null, b.bottleDate ? `Bottled ${fmtDate(b.bottleDate)}` : null].filter(Boolean).join(' · ');
+  return `
+    <div class="card batch">
+      <div class="batch-main">
+        <h3>${escapeHtml(b.name)}</h3>
+        <div class="batch-dates">${dateRange || 'No dates recorded'}</div>
+        ${b.rating ? `<div class="batch-stars">${stars}</div>` : ''}
+        <div class="batch-stats">
+          ${b.og ? `<div class="stat"><span class="stat-label">OG</span><span class="stat-val">${b.og}</span></div>` : ''}
+          ${b.fg ? `<div class="stat"><span class="stat-label">FG</span><span class="stat-val">${b.fg}</span></div>` : ''}
+          ${b.abv !== null && b.abv !== undefined ? `<div class="stat"><span class="stat-label">ABV</span><span class="stat-val">${b.abv.toFixed(2)}%</span></div>` : ''}
+        </div>
+        ${b.notes ? `<div class="batch-notes">${escapeHtml(b.notes)}</div>` : ''}
+      </div>
+      <div class="batch-actions">
+        <button class="ghost small" onclick="editBatch('${b.id}')">Edit</button>
+        <button class="danger-ghost small" onclick="deleteBatch('${b.id}')">Delete</button>
+      </div>
+    </div>`;
+}
+
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// Export / Import
+document.getElementById('exportBtn').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify(batches, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const stamp = new Date().toISOString().slice(0,10);
+  a.href = url;
+  a.download = `addie-brewery-logbook-${stamp}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('Logbook exported');
+});
+
+document.getElementById('importBtn').addEventListener('click', () => {
+  document.getElementById('importInput').click();
+});
+document.getElementById('importInput').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (evt) => {
+    try{
+      const imported = JSON.parse(evt.target.result);
+      if(!Array.isArray(imported)) throw new Error('bad format');
+      const existingIds = new Set(batches.map(b => b.id));
+      let added = 0;
+      imported.forEach(b => {
+        if(b && b.id && !existingIds.has(b.id)){
+          batches.push(b);
+          existingIds.add(b.id);
+          added++;
+        }
+      });
+      batches.sort((a,b) => (b.brewDate || '').localeCompare(a.brewDate || ''));
+      save();
+      render();
+      showToast(`Imported ${added} batch${added === 1 ? '' : 'es'}`);
+    }catch(err){
+      showToast('Could not read that file');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+});
+
+load();
+render();
+</script>
+</body>
+</html>

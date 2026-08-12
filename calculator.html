@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Addie Brewery Priming Sugar Calculator</title>
+<link rel="icon" href="favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#14100c">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #14100c;
+    --panel: #1d1610;
+    --panel-2: #241b13;
+    --line: #372a1c;
+    --copper: #c9752b;
+    --copper-bright: #e08f3f;
+    --brass: #b08d57;
+    --foam: #f3e9d2;
+    --text: #ece1cc;
+    --text-dim: #a1907a;
+    --good: #7a9b5c;
+    --warn: #c9752b;
+    --danger: #b64b3a;
+    --radius: 4px;
+  }
+  *{ box-sizing: border-box; }
+  html,body{
+    margin:0; padding:0;
+    background: radial-gradient(120% 140% at 15% -10%, #241a10 0%, var(--bg) 55%);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    min-height: 100vh;
+  }
+  .wrap{
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 48px 24px 72px;
+  }
+  header{
+    margin-bottom: 40px;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 28px;
+  }
+  .eyebrow{
+    font-size: 12px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--copper-bright);
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  h1{
+    font-family: 'Fraunces', serif;
+    font-optical-sizing: auto;
+    font-weight: 600;
+    font-size: clamp(32px, 5vw, 48px);
+    line-height: 1.05;
+    margin: 0 0 10px;
+    color: var(--foam);
+    letter-spacing: -0.01em;
+  }
+  header p{
+    color: var(--text-dim);
+    font-size: 15px;
+    max-width: 46ch;
+    line-height: 1.5;
+    margin: 0;
+  }
+  .layout{
+    display: grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: 28px;
+    align-items: start;
+  }
+  @media (max-width: 760px){
+    .layout{ grid-template-columns: 1fr; }
+  }
+  .card{
+    background: linear-gradient(180deg, var(--panel-2), var(--panel));
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 28px;
+  }
+  .field{ margin-bottom: 22px; }
+  .field:last-child{ margin-bottom: 0; }
+  label{
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    letter-spacing: 0.01em;
+  }
+  label .val{
+    font-family: 'Fraunces', serif;
+    color: var(--copper-bright);
+    font-size: 15px;
+    font-weight: 600;
+  }
+  input[type="number"], select{
+    width: 100%;
+    background: #120d08;
+    border: 1px solid var(--line);
+    color: var(--foam);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 16px;
+    padding: 11px 12px;
+    border-radius: var(--radius);
+    outline: none;
+    transition: border-color .15s ease;
+    appearance: none;
+  }
+  input[type="number"]:focus, select:focus{
+    border-color: var(--copper);
+  }
+  select{
+    background-image: linear-gradient(45deg, transparent 50%, var(--brass) 50%), linear-gradient(135deg, var(--brass) 50%, transparent 50%);
+    background-position: calc(100% - 18px) center, calc(100% - 13px) center;
+    background-size: 5px 5px, 5px 5px;
+    background-repeat: no-repeat;
+    cursor: pointer;
+  }
+  .row2{ display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  input[type="range"]{
+    width: 100%;
+    -webkit-appearance: none;
+    height: 3px;
+    background: var(--line);
+    border-radius: 2px;
+    outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb{
+    -webkit-appearance: none;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--copper-bright);
+    border: 2px solid var(--foam);
+    cursor: pointer;
+    margin-top: -6.5px;
+  }
+  input[type="range"]::-moz-range-thumb{
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--copper-bright);
+    border: 2px solid var(--foam);
+    cursor: pointer;
+  }
+  .unit-toggle{
+    display: inline-flex;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .unit-toggle button{
+    background: transparent;
+    color: var(--text-dim);
+    border: none;
+    padding: 6px 12px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+  }
+  .unit-toggle button.active{
+    background: var(--copper);
+    color: #1a1208;
+    font-weight: 600;
+  }
+
+  /* Visualization panel */
+  .viz-card{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    position: sticky;
+    top: 24px;
+  }
+  .glass-frame{ width: 168px; margin: 4px auto 18px; }
+  .result-main{
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 44px;
+    color: var(--foam);
+    line-height: 1;
+    margin: 2px 0 2px;
+  }
+  .result-main .unit{
+    font-size: 16px;
+    color: var(--text-dim);
+    font-weight: 500;
+    margin-left: 4px;
+  }
+  .result-sub{
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-bottom: 20px;
+  }
+  .gauge{
+    width: 100%;
+    margin-top: 4px;
+  }
+  .gauge-track{
+    position: relative;
+    height: 6px;
+    border-radius: 3px;
+    background: linear-gradient(90deg, #4a5a3a 0%, var(--good) 22%, var(--copper) 55%, var(--danger) 100%);
+    margin-bottom: 10px;
+  }
+  .gauge-marker{
+    position: absolute;
+    top: -5px;
+    width: 2px;
+    height: 16px;
+    background: var(--foam);
+    box-shadow: 0 0 6px var(--foam);
+    transform: translateX(-1px);
+  }
+  .gauge-labels{
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .status-pill{
+    display: inline-block;
+    margin-top: 16px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    letter-spacing: 0.03em;
+    font-weight: 600;
+  }
+  .status-good{ background: rgba(122,155,92,0.15); color: var(--good); border: 1px solid rgba(122,155,92,0.4); }
+  .status-warn{ background: rgba(201,117,43,0.15); color: var(--copper-bright); border: 1px solid rgba(201,117,43,0.4); }
+  .status-danger{ background: rgba(182,75,58,0.15); color: #d97f6c; border: 1px solid rgba(182,75,58,0.4); }
+
+  .note{
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.55;
+    margin-top: 22px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+  }
+  .note strong{ color: var(--brass); }
+  nav{
+    display: flex;
+    gap: 18px;
+    margin-bottom: 20px;
+    font-size: 13px;
+  }
+  nav a{
+    color: var(--text-dim);
+    text-decoration: none;
+    padding-bottom: 4px;
+    border-bottom: 2px solid transparent;
+    letter-spacing: 0.02em;
+  }
+  nav a.active{
+    color: var(--copper-bright);
+    border-bottom-color: var(--copper);
+  }
+  nav a:hover{ color: var(--foam); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="logbook.html">Batch Logbook</a>
+    <a href="calculator.html" class="active">Priming Calculator</a>
+  </nav>
+  <header>
+    <div class="eyebrow">Addie Brewery · Bottling Day</div>
+    <h1>Priming Sugar Calculator</h1>
+    <p>Work out exactly how much priming sugar to add at bottling, based on your batch size, temperature, and target carbonation.</p>
+  </header>
+
+  <div class="layout">
+    <div class="card">
+      <div class="field">
+        <label>Batch size <span class="val" id="volVal">23 L</span></label>
+        <input type="number" id="volume" value="23" step="0.5" min="1">
+      </div>
+
+      <div class="field">
+        <label>Beer style <span class="val" id="styleVal"></span></label>
+        <select id="style"></select>
+      </div>
+
+      <div class="field">
+        <label>Target carbonation <span class="val" id="targetVal">2.4 vols CO₂</span></label>
+        <input type="range" id="target" min="1.0" max="4.5" step="0.05" value="2.4">
+      </div>
+
+      <div class="field">
+        <label>Temperature at bottling <span class="val" id="tempVal">20 °C</span></label>
+        <input type="range" id="temp" min="0" max="30" step="0.5" value="20">
+        <div style="font-size:11px;color:var(--text-dim);margin-top:6px;">Use the warmest temperature the beer reached during fermentation, if it was warmer than now — that's what sets how much CO₂ is already dissolved.</div>
+      </div>
+
+      <div class="field">
+        <label>Sugar type</label>
+        <select id="sugarType">
+          <option value="4.0">Dextrose (corn sugar)</option>
+          <option value="3.83">Table sugar (sucrose)</option>
+          <option value="4.6">Dried malt extract</option>
+          <option value="5.0">Honey</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="card viz-card">
+      <div class="glass-frame">
+        <svg viewBox="0 0 120 200" width="100%" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="beerGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#e6a13d"/>
+              <stop offset="100%" stop-color="#b06a1f"/>
+            </linearGradient>
+            <clipPath id="glassClip">
+              <path d="M22 18 L98 18 L90 178 Q60 190 30 178 Z"/>
+            </clipPath>
+          </defs>
+          <path d="M22 18 L98 18 L90 178 Q60 190 30 178 Z" fill="none" stroke="#4a3a26" stroke-width="2"/>
+          <g clip-path="url(#glassClip)">
+            <rect id="beerFill" x="20" y="70" width="80" height="120" fill="url(#beerGrad)"/>
+            <rect id="foamFill" x="20" y="0" width="80" height="0" fill="#f3e9d2" opacity="0.92"/>
+            <g id="bubbles"></g>
+          </g>
+          <path d="M22 18 L98 18 L90 178 Q60 190 30 178 Z" fill="none" stroke="#3a2c1c" stroke-width="1.5" opacity="0.6"/>
+        </svg>
+      </div>
+
+      <div class="result-main"><span id="grams">—</span><span class="unit">g</span></div>
+      <div class="result-sub" id="ozNote">— oz</div>
+
+      <div class="gauge">
+        <div class="gauge-track">
+          <div class="gauge-marker" id="gaugeMarker" style="left:0%"></div>
+        </div>
+        <div class="gauge-labels"><span>Flat</span><span>Crisp</span><span>Gusher risk</span></div>
+      </div>
+
+      <div class="status-pill" id="statusPill"></div>
+
+      <div class="note">
+        <strong>Dissolve first:</strong> boil the sugar in ~250ml water for a couple of minutes, cool slightly, then stir gently into the bottling bucket before filling bottles.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const styles = [
+  {name:"British ale", lo:1.5, hi:2.2},
+  {name:"American ale", lo:2.2, hi:2.8},
+  {name:"Belgian ale", lo:2.4, hi:3.0},
+  {name:"Lager", lo:2.2, hi:2.7},
+  {name:"Porter / stout", lo:1.7, hi:2.3},
+  {name:"German wheat beer", lo:3.3, hi:4.5},
+  {name:"Custom", lo:null, hi:null},
+];
+
+const volumeEl = document.getElementById('volume');
+const targetEl = document.getElementById('target');
+const tempEl = document.getElementById('temp');
+const styleEl = document.getElementById('style');
+const sugarEl = document.getElementById('sugarType');
+styles.forEach((s, i) => {
+  const opt = document.createElement('option');
+  opt.value = i;
+  opt.textContent = s.hi ? `${s.name} (${s.lo}–${s.hi})` : s.name;
+  styleEl.appendChild(opt);
+});
+styleEl.value = 1; // American ale default
+
+styleEl.addEventListener('change', () => {
+  const s = styles[styleEl.value];
+  if(s.lo !== null){
+    targetEl.value = ((s.lo + s.hi) / 2).toFixed(2);
+  }
+  update();
+});
+
+[volumeEl, targetEl, tempEl, sugarEl].forEach(el => el.addEventListener('input', update));
+
+function litres(){
+  return parseFloat(volumeEl.value) || 0;
+}
+
+function residualCO2(tempC){
+  const f = tempC * 9/5 + 32;
+  return 3.0378 - 0.050062*f + 0.00026555*f*f;
+}
+
+function update(){
+  const L = litres();
+  const target = parseFloat(targetEl.value);
+  const tempC = parseFloat(tempEl.value);
+  const sugarFactor = parseFloat(sugarEl.value);
+
+  document.getElementById('volVal').textContent = `${volumeEl.value} L`;
+  document.getElementById('targetVal').textContent = `${target.toFixed(2)} vols CO₂`;
+  document.getElementById('tempVal').textContent = `${tempC.toFixed(1)} °C`;
+
+  const s = styles[styleEl.value];
+  document.getElementById('styleVal').textContent = s.hi ? `${s.lo}–${s.hi} vols` : '';
+
+  const residual = residualCO2(tempC);
+  const diff = Math.max(0, target - residual);
+  const grams = L * diff * sugarFactor;
+  const oz = grams / 28.3495;
+
+  document.getElementById('grams').textContent = grams.toFixed(0);
+  document.getElementById('ozNote').textContent = `${oz.toFixed(2)} oz · residual ${residual.toFixed(2)} vols already in beer`;
+
+  // Gauge: map 1.0 -> 4.5 vols across 0-100%
+  const gaugeMin = 1.0, gaugeMax = 4.5;
+  const pct = Math.min(100, Math.max(0, ((target - gaugeMin) / (gaugeMax - gaugeMin)) * 100));
+  document.getElementById('gaugeMarker').style.left = pct + '%';
+
+  const pill = document.getElementById('statusPill');
+  if(target < 1.6){
+    pill.textContent = 'Low carbonation — may taste flat';
+    pill.className = 'status-pill status-warn';
+  } else if(target <= 3.2){
+    pill.textContent = 'Solid, bottle-safe range';
+    pill.className = 'status-pill status-good';
+  } else {
+    pill.textContent = 'High — use strong bottles, risk of gushers/bombs';
+    pill.className = 'status-pill status-danger';
+  }
+
+  // Visualization: beer level constant, foam height + bubble density scale with target CO2
+  const foamHeight = Math.min(46, Math.max(4, (target - 1.0) * 13));
+  const foam = document.getElementById('foamFill');
+  foam.setAttribute('y', 70 - foamHeight);
+  foam.setAttribute('height', foamHeight);
+
+  const beer = document.getElementById('beerFill');
+  beer.setAttribute('y', 70);
+  beer.setAttribute('height', 120);
+
+  renderBubbles(target);
+}
+
+let bubbleTimer = null;
+function renderBubbles(target){
+  const group = document.getElementById('bubbles');
+  group.innerHTML = '';
+  const count = Math.round(3 + (target - 1.0) * 4);
+  for(let i=0; i<count; i++){
+    const cx = 28 + Math.random()*64;
+    const r = 1 + Math.random()*1.6;
+    const dur = (2.2 + Math.random()*1.8).toFixed(2);
+    const delay = (Math.random()*3).toFixed(2);
+    const circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    circle.setAttribute('cx', cx);
+    circle.setAttribute('cy', 185);
+    circle.setAttribute('r', r);
+    circle.setAttribute('fill', '#fbe6bd');
+    circle.setAttribute('opacity', '0.75');
+    const animate = document.createElementNS('http://www.w3.org/2000/svg','animate');
+    animate.setAttribute('attributeName','cy');
+    animate.setAttribute('from','185');
+    animate.setAttribute('to','25');
+    animate.setAttribute('dur', dur+'s');
+    animate.setAttribute('begin', delay+'s');
+    animate.setAttribute('repeatCount','indefinite');
+    const animateOpacity = document.createElementNS('http://www.w3.org/2000/svg','animate');
+    animateOpacity.setAttribute('attributeName','opacity');
+    animateOpacity.setAttribute('values','0;0.8;0.8;0');
+    animateOpacity.setAttribute('dur', dur+'s');
+    animateOpacity.setAttribute('begin', delay+'s');
+    animateOpacity.setAttribute('repeatCount','indefinite');
+    circle.appendChild(animate);
+    circle.appendChild(animateOpacity);
+    group.appendChild(circle);
+  }
+}
+
+update();
+</script>
+</body>
+</html>
